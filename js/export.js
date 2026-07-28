@@ -152,6 +152,7 @@ function exportSVG() {
             hideTarget();
           }
         });
+      }
     });
 
     // Apply interaction effects to Triggers
