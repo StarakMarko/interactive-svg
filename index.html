@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interactive SVG Editor</title>
+  <meta name="description" content="Create interactive SVG files with hover and click triggers — no code required." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/main.css" />
+</head>
+
+<body>
+  <!-- ===== TOP TOOLBAR ===== -->
+  <header id="toolbar" class="toolbar">
+    <div class="toolbar__brand">
+      <span class="toolbar__logo material-icons-round">layers</span>
+      <span class="toolbar__title">Interactive SVG</span>
+    </div>
+
+    <div class="toolbar__separator"></div>
+
+    <div class="toolbar__group">
+      <button id="btn-import" class="toolbar__btn" title="Import SVG (Ctrl+I)">
+        <span class="material-icons-round">file_upload</span>
+        <span class="toolbar__btn-label">Import SVG</span>
+      </button>
+      <button id="btn-open" class="toolbar__btn" title="Open Project (Ctrl+O)">
+        <span class="material-icons-round">folder_open</span>
+        <span class="toolbar__btn-label">Open</span>
+      </button>
+      <button id="btn-save" class="toolbar__btn" title="Save Project (Ctrl+S)">
+        <span class="material-icons-round">save</span>
+        <span class="toolbar__btn-label">Save</span>
+      </button>
+    </div>
+
+    <div class="toolbar__separator"></div>
+
+    <div class="toolbar__group">
+      <button id="btn-undo" class="toolbar__btn toolbar__btn--icon" title="Undo (Ctrl+Z)" disabled>
+        <span class="material-icons-round">undo</span>
+      </button>
+      <button id="btn-redo" class="toolbar__btn toolbar__btn--icon" title="Redo (Ctrl+Shift+Z)" disabled>
+        <span class="material-icons-round">redo</span>
+      </button>
+    </div>
+
+    <div class="toolbar__separator"></div>
+
+    <div class="toolbar__group">
+      <button id="btn-preview" class="toolbar__btn toolbar__btn--toggle" title="Preview (P)">
+        <span class="material-icons-round">play_circle</span>
+        <span class="toolbar__btn-label">Preview</span>
+      </button>
+      <button id="btn-export" class="toolbar__btn" title="Export SVG (Ctrl+E)">
+        <span class="material-icons-round">download</span>
+        <span class="toolbar__btn-label">Export SVG</span>
+      </button>
+    </div>
+
+    <div class="toolbar__spacer"></div>
+
+    <div class="toolbar__group">
+      <div id="zoom-display" class="toolbar__zoom" title="Zoom level">100%</div>
+      <button id="btn-zoom-in" class="toolbar__btn toolbar__btn--icon" title="Zoom In (+)">
+        <span class="material-icons-round">add</span>
+      </button>
+      <button id="btn-zoom-out" class="toolbar__btn toolbar__btn--icon" title="Zoom Out (-)">
+        <span class="material-icons-round">remove</span>
+      </button>
+      <button id="btn-zoom-reset" class="toolbar__btn toolbar__btn--icon" title="Reset Zoom (0)">
+        <span class="material-icons-round">center_focus_strong</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main id="main" class="main">
+    <!-- LEFT SIDEBAR — LAYERS -->
+    <aside id="layers-panel" class="panel panel--left">
+      <div class="panel__header">
+        <span class="panel__title">Layers</span>
+        <button id="btn-collapse-all" class="panel__action" title="Collapse all">
+          <span class="material-icons-round">unfold_less</span>
+        </button>
+        <button id="btn-expand-all" class="panel__action" title="Expand all">
+          <span class="material-icons-round">unfold_more</span>
+        </button>
+      </div>
+      <div class="panel__search">
+        <span class="material-icons-round panel__search-icon">search</span>
+        <input id="layers-search" type="text" class="panel__search-input" placeholder="Search layers…" />
+      </div>
+      <div id="layers-tree" class="layers-tree">
+        <div class="layers-tree__empty">
+          <span class="material-icons-round">upload_file</span>
+          <p>Import an SVG to see layers</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER CANVAS -->
+    <section id="canvas-area" class="canvas-area">
+      <div id="canvas-container" class="canvas-container">
+        <div id="svg-viewport" class="svg-viewport"></div>
+        <!-- Selection overlay -->
+        <svg id="selection-overlay" class="selection-overlay"></svg>
+      </div>
+      <!-- Interaction pick mode banner -->
+      <div id="pick-banner" class="pick-banner pick-banner--hidden">
+        <span class="material-icons-round">touch_app</span>
+        <span>Click an element to set as interaction target</span>
+        <button id="btn-cancel-pick" class="pick-banner__cancel">Cancel (Esc)</button>
+      </div>
+      <!-- Preview mode badge -->
+      <div id="preview-badge" class="preview-badge preview-badge--hidden">
+        <span class="material-icons-round">visibility</span>
+        Preview Mode
+        <button id="btn-exit-preview" class="preview-badge__exit">Exit</button>
+      </div>
+      <!-- Floating target confirm button -->
+      <button id="btn-confirm-target" class="target-confirm-btn target-confirm-btn--hidden" title="Confirm Target">
+        <span class="material-icons-round">add</span>
+      </button>
+      <!-- Empty state -->
+      <div id="canvas-empty" class="canvas-empty">
+        <div class="canvas-empty__content">
+          <span class="material-icons-round canvas-empty__icon">add_photo_alternate</span>
+          <h2>Import an SVG to get started</h2>
+          <p>Drag & drop an SVG file here, or use the Import button above</p>
+          <button id="btn-import-empty" class="btn btn--primary">
+            <span class="material-icons-round">file_upload</span>
+            Import SVG
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT SIDEBAR — PROPERTIES -->
+    <aside id="properties-panel" class="panel panel--right">
+      <div class="panel__header">
+        <span class="panel__title">Properties</span>
+      </div>
+      <div id="properties-content" class="properties-content">
+        <!-- Empty state -->
+        <div id="props-empty" class="properties-empty">
+          <span class="material-icons-round">touch_app</span>
+          <p>Select an element to view properties</p>
+        </div>
+
+        <!-- Element info (hidden initially) -->
+        <div id="props-element" class="properties-section" style="display:none;">
+          <div class="properties-section__header">
+            Element Info
+          </div>
+          <div class="properties-grid properties-grid--compact">
+            <div class="properties-field properties-field--inline">
+              <label>ID</label>
+              <span id="prop-id" class="properties-value">—</span>
+            </div>
+            <div class="properties-field properties-field--inline">
+              <label>TAG</label>
+              <span id="prop-tag" class="properties-value">—</span>
+            </div>
+            <div class="properties-field properties-field--inline">
+              <label>POSITION</label>
+              <span id="prop-position" class="properties-value">—</span>
+            </div>
+            <div class="properties-field properties-field--inline">
+              <label>SIZE</label>
+              <span id="prop-size" class="properties-value">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactions section (hidden initially) -->
+        <div id="props-interactions" class="properties-section" style="display:none;">
+          <div class="properties-section__header">
+            Interactions
+            <button id="btn-add-interaction" class="btn btn--small btn--green" title="Add interactivity">
+              Add interactivity
+            </button>
+          </div>
+          <div id="interactions-list" class="interactions-list">
+            <div class="interactions-list__empty">
+              <p>No interactions yet</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- All interactions overview -->
+        <div id="props-all-interactions" class="properties-section">
+          <div class="properties-section__header">
+            ALL INTERACTIONS
+            <span id="interaction-count" class="badge">0</span>
+          </div>
+          <div id="all-interactions-list" class="interactions-list">
+            <div class="interactions-list__empty">
+              <p>No interactions defined</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Hidden file inputs -->
+  <input type="file" id="file-input-svg" accept=".svg" hidden />
+  <input type="file" id="file-input-project" accept=".isvg" hidden />
+
+  <!-- JS Modules -->
+  <script type="module" src="js/app.js"></script>
+</body>
+
+</html>
